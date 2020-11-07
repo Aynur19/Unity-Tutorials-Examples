@@ -74,6 +74,10 @@ public class PlayerController : MonoBehaviour
     /// Обычный (начальный) цвет игрока.
     /// </summary>
     private Color originPlayerColor;
+
+    private Color[] playerColors;
+
+    private bool isNextColorByLerp;
     #endregion
 
     #region Player Life Cycle
@@ -111,7 +115,11 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     void Update()
     {
-        //Debug.Log("Update time :" + Time.deltaTime);
+        if(isNextColorByLerp)
+        {
+            playerRenderer.material.color = Color.Lerp(playerRenderer.material.color,
+                                                       playerColors[colorChangeCount], 0.5f * Time.deltaTime);
+        }
     }
     #endregion
 
@@ -121,6 +129,18 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void ComponentsInitialise()
     {
+        playerColors = new Color[]
+        {
+            Color.black,
+            Color.blue,
+            Color.cyan,
+            Color.gray,
+            Color.green,
+            Color.magenta,
+            Color.red,
+            Color.white,
+            Color.yellow,
+        };
         playerRigidbody = GetComponent<Rigidbody>();
         playerRenderer = GetComponent<Renderer>();
         count = 0;
@@ -129,6 +149,16 @@ public class PlayerController : MonoBehaviour
         originPlayerColor = playerRenderer.material.color;
         winTextObject.SetActive(false);
         centralLamp.enabled = false;
+        isNextColorByLerp = false;
+    }
+
+    private void IncreaseColorValue()
+    {
+        colorChangeCount++;
+        if(colorChangeCount >= playerColors.Length)
+        {
+            colorChangeCount = 0;
+        }
     }
     
     /// <summary>
@@ -158,42 +188,25 @@ public class PlayerController : MonoBehaviour
         movementY = movementVector.y;
     }
 
+    private void OnChangeColorLerp(InputValue colorValue)
+    {
+        isNextColorByLerp = !isNextColorByLerp;
+
+        if(isNextColorByLerp)
+        {
+            IncreaseColorValue();
+        }
+    }
+
     /// <summary>
     /// Изменение цвета игрока.
     /// </summary>
     /// <param name="colorValue"></param>
     private void OnChangeColor(InputValue colorValue)
     {
-        colorChangeCount++;
-        if(colorChangeCount >= 7)
-        {
-            colorChangeCount = 0;
-        }
+        IncreaseColorValue();
 
-        switch(colorChangeCount)
-        {
-            case 1:
-                playerRenderer.material.color = Color.black;
-                break;
-            case 2:
-                playerRenderer.material.color = Color.blue;
-                break;
-            case 3:
-                playerRenderer.material.color = Color.green;
-                break;
-            case 4:
-                playerRenderer.material.color = Color.red;
-                break;
-            case 5:
-                playerRenderer.material.color = Color.white;
-                break;
-            case 6:
-                playerRenderer.material.color = Color.yellow;
-                break;
-            default:
-                playerRenderer.material.color = originPlayerColor;
-                break;
-        }
+        playerRenderer.material.color = playerColors[colorChangeCount];
     }
 
     /// <summary>
