@@ -75,8 +75,14 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private Color originPlayerColor;
 
+    /// <summary>
+    /// Массив цветов игрока.
+    /// </summary>
     private Color[] playerColors;
 
+    /// <summary>
+    /// Указатель того, что цвет игрока меняется через мето Color.Lerp().
+    /// </summary>
     private bool isNextColorByLerp;
     #endregion
 
@@ -113,13 +119,10 @@ public class PlayerController : MonoBehaviour
     /// Метод обновления кадра.
     /// Вызывается перед самым выводом следующего фрейма.
     /// </summary>
-    void Update()
+    private void Update()
     {
-        if(isNextColorByLerp)
-        {
-            playerRenderer.material.color = Color.Lerp(playerRenderer.material.color,
-                                                       playerColors[colorChangeCount], 0.5f * Time.deltaTime);
-        }
+        // Плавное изменение цвета игрока.
+        SetObjectMaterialColorByLerp(playerRenderer, isNextColorByLerp);
     }
     #endregion
 
@@ -152,12 +155,29 @@ public class PlayerController : MonoBehaviour
         isNextColorByLerp = false;
     }
 
+    /// <summary>
+    /// Увеличение счетика изменений цвета игрока.
+    /// </summary>
     private void IncreaseColorValue()
     {
         colorChangeCount++;
         if(colorChangeCount >= playerColors.Length)
         {
             colorChangeCount = 0;
+        }
+    }
+
+    /// <summary>
+    /// Плавное изменение цвета объекта через метод Color.Lerp().
+    /// </summary>
+    /// <param name="objectRenderer">Компонент отрисовки объекта.</param>
+    /// <param name="isLerpActivate">Флажок включенности функции Color.Lerp().</param>
+    private void SetObjectMaterialColorByLerp(Renderer objectRenderer, bool isLerpActivate)
+    {
+        if(isLerpActivate)
+        {
+            playerRenderer.material.color = Color.Lerp(playerRenderer.material.color,
+                                                       playerColors[colorChangeCount], 0.5f * Time.deltaTime);
         }
     }
     
@@ -179,7 +199,7 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Движения игрока.
     /// </summary>
-    /// <param name="movementValue">Значение ввода.</param>
+    /// <param name="movementValue">Ввод пользователя. Клавиши 'WSDA'.</param>
     private void OnMove(InputValue movementValue)
     {
         var movementVector = movementValue.Get<Vector2>();
@@ -188,6 +208,10 @@ public class PlayerController : MonoBehaviour
         movementY = movementVector.y;
     }
 
+    /// <summary>
+    /// Плавное изменение цвета игрока
+    /// </summary>
+    /// <param name="colorValue">Ввод пользователя. Клавиша 'J'.</param>
     private void OnChangeColorLerp(InputValue colorValue)
     {
         isNextColorByLerp = !isNextColorByLerp;
@@ -201,18 +225,18 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Изменение цвета игрока.
     /// </summary>
-    /// <param name="colorValue"></param>
+    /// <param name="colorValue">Ввод пользователя. Клавиша 'R'.</param>
     private void OnChangeColor(InputValue colorValue)
     {
         IncreaseColorValue();
-
+        isNextColorByLerp = false;
         playerRenderer.material.color = playerColors[colorChangeCount];
     }
 
     /// <summary>
     /// Изменение источника света.
     /// </summary>
-    /// <param name="lightSourceValue"></param>
+    /// <param name="lightSourceValue">Ввод пользователя. Клавиша 'N'.</param>
     private void OnChangeLightSource(InputValue lightSourceValue)
     {
         sun.enabled = !sun.enabled;

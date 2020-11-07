@@ -52,6 +52,14 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "ChangeDirectionalLightIntensity",
+                    "type": "Button",
+                    "id": "6fd13bf4-4c9f-4453-bfdc-d7eeb5ac9af3",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -305,6 +313,17 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "ChangeColorLerp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dcc28e1e-0d47-4eec-a08f-d59393d4fe2d",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "ChangeDirectionalLightIntensity",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
