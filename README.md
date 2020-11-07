@@ -1,4 +1,4 @@
-# Unity Examples of Tutorials - примеры проектов Unity по обуающим курсам
+# Unity Examples of Tutorials - примеры проектов Unity по обучающим курсам
 
 ## 1. Unity_Roll-a-Ball
 Данный проект включает реализацию следующих обучающих материалов, проектов:
