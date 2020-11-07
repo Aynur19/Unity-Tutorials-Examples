@@ -2378,6 +2378,8 @@ MonoBehaviour:
   speed: 5
   countText: {fileID: 609512013}
   winTextObject: {fileID: 1497172707}
+  minLightIntensity: 0.5
+  maxLightIntensity: 5
 --- !u!114 &1744524710
 MonoBehaviour:
   m_ObjectHideFlags: 0

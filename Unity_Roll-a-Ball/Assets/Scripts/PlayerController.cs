@@ -37,6 +37,16 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     [SerializeField]
     private GameObject winTextObject;
+    
+    /// <summary>
+    /// Минимальная интенсивность света.
+    /// </summary>
+    [SerializeField] private float minLightIntensity;
+    
+    /// <summary>
+    /// Максимальная интенсивность света.
+    /// </summary>
+    [SerializeField] private float maxLightIntensity;
     #endregion
 
     #region Private Fields
@@ -84,6 +94,13 @@ public class PlayerController : MonoBehaviour
     /// Указатель того, что цвет игрока меняется через мето Color.Lerp().
     /// </summary>
     private bool isNextColorByLerp;
+
+    /// <summary>
+    /// Кортеж:
+    /// 1. Указатель того, то включен режим изменения интенсивность света.
+    /// 2. Указатель того, то интенсивность надо повышать, если true, иначе уменьшать. 
+    /// </summary>
+    private (bool, bool) isLightIntensityChangingMode;
     #endregion
 
     #region Player Life Cycle
@@ -123,6 +140,9 @@ public class PlayerController : MonoBehaviour
     {
         // Плавное изменение цвета игрока.
         SetObjectMaterialColorByLerp(playerRenderer, isNextColorByLerp);
+
+        // Плавное изменение интенсивности солнечного света.
+        SetLightIntensityBySmoothDamp(sun, isLightIntensityChangingMode);
     }
     #endregion
 
@@ -153,6 +173,7 @@ public class PlayerController : MonoBehaviour
         winTextObject.SetActive(false);
         centralLamp.enabled = false;
         isNextColorByLerp = false;
+        isLightIntensityChangingMode = (false, false);
     }
 
     /// <summary>
@@ -193,6 +214,29 @@ public class PlayerController : MonoBehaviour
             winTextObject.SetActive(true);
         }
     }
+
+    /// <summary>
+    /// Плавное изменение изтенсивности света.
+    /// </summary>
+    /// <param name="currentLight">Источник света.</param>
+    /// <param name="isLightIntensityChange">Указатель включенности и направления изменения интенсивности света.</param>
+    private void SetLightIntensityBySmoothDamp(Light currentLight, (bool, bool) isLightIntensityChange)
+    {
+        if(isLightIntensityChange.Item1)
+        {
+            float intensityVelocity = 0.0f;
+            if(isLightIntensityChangingMode.Item2)
+            {
+                currentLight.intensity = Mathf.SmoothDamp(currentLight.intensity, maxLightIntensity, 
+                                                          ref intensityVelocity, 0.3f);
+            }
+            else
+            {
+                currentLight.intensity = Mathf.SmoothDamp(currentLight.intensity, minLightIntensity, 
+                                                          ref intensityVelocity, 0.3f);
+            }
+        }
+    }
     #endregion
 
     #region Event Handlers
@@ -206,6 +250,20 @@ public class PlayerController : MonoBehaviour
 
         movementX = movementVector.x;
         movementY = movementVector.y;
+    }
+
+    /// <summary>
+    /// Плавное изменение интенсивности света - Directional Light через метод Math.SmoothDamp().
+    /// </summary>
+    /// <param name="inputValue">Ввод пользователя. Клавиша 'I'.</param>
+    private void OnChangeDirectionalLightIntensity(InputValue inputValue)
+    {
+        isLightIntensityChangingMode.Item1 = !isLightIntensityChangingMode.Item1;
+
+        if(isLightIntensityChangingMode.Item1)
+        {
+            isLightIntensityChangingMode.Item2 = !isLightIntensityChangingMode.Item2;
+        }
     }
 
     /// <summary>
