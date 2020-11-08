@@ -9,6 +9,12 @@ public class PlayerController : MonoBehaviour
 {
     #region Private Serialize Fields
     /// <summary>
+    /// Игровой объект - другой мяч.
+    /// </summary>
+    [SerializeField] 
+    private GameObject otherBall;
+    
+    /// <summary>
     /// Солнечный свет.
     /// </summary>
     [SerializeField]
@@ -315,6 +321,15 @@ public class PlayerController : MonoBehaviour
             count++;
             SetCountText();
         }
+    }
+
+    /// <summary>
+    /// Обработчик команды удаления другого мяча через 3 секунды после ввода команды.
+    /// </summary>
+    /// <param name="inputValue">Ввод пользователя. Клавиша 'Backspace'.</param>
+    private void OnDestroyOtherBall(InputValue inputValue)
+    {
+        Destroy(otherBall, 3f);    
     }
     #endregion
 }
