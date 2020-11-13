@@ -84,7 +84,7 @@ public class CameraController : MonoBehaviour
     /// Изменение цели камеры.
     /// </summary>
     /// <param name="lookAtValue"></param>
-    private void OnLookAtTarget(InputValue lookAtValue)
+    public void OnLookAtTarget(InputAction.CallbackContext context)
     {
         // В зависимости от текущей устанавливае текущий трансформ и трансформа будущей цели.
         if(isLookAtPlayer)

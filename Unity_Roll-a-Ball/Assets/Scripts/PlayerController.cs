@@ -107,6 +107,8 @@ public class PlayerController : MonoBehaviour
     /// 2. Указатель того, то интенсивность надо повышать, если true, иначе уменьшать. 
     /// </summary>
     private (bool, bool) isLightIntensityChangingMode;
+
+    private DefaultInputActions inputActions; 
     #endregion
 
     #region Player Life Cycle
@@ -116,9 +118,24 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void Awake()
     {
-        //Debug.Log("Awake called.");
+        this.inputActions = new DefaultInputActions();
+        this.inputActions.Player.Jump.performed += context => Jump();
+        this.inputActions.Player.Move.performed += OnMove;
+        this.inputActions.Player.ChangeDirectionalLightIntensity.performed += context => ChangeDirectionalLightIntensity();
+        this.inputActions.Player.ChangeColorLerp.performed += context => ChangeColorLerp();
+        this.inputActions.Player.ChangeColor.performed += context => ChangeColor();
+        this.inputActions.Player.ChangeLightSource.performed += context => ChangeLightSource();
+        this.inputActions.Player.DestroyOtherBall.performed += context => DestroyOtherBall();
     }
-    
+
+    /// <summary>
+    /// Включение компонентов игрока.
+    /// </summary>
+    private void OnEnable()
+    {
+        this.inputActions.Player.Enable();
+    }
+
     /// <summary>
     /// Начальный метод игрока.
     /// </summary>
@@ -133,9 +150,8 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void FixedUpdate()
     {
-        var movement = new Vector3(movementX,0.0f,movementY);
-        
-        playerRigidbody.AddForce(movement * speed);
+        var movement = new Vector3(this.movementX,0.0f,this.movementY);
+        this.playerRigidbody.AddForce(movement * this.speed);
     }
     
     /// <summary>
@@ -145,10 +161,81 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         // Плавное изменение цвета игрока.
-        SetObjectMaterialColorByLerp(playerRenderer, isNextColorByLerp);
+        SetObjectMaterialColorByLerp(this.playerRenderer, this.isNextColorByLerp);
 
         // Плавное изменение интенсивности солнечного света.
-        SetLightIntensityBySmoothDamp(sun, isLightIntensityChangingMode);
+        SetLightIntensityBySmoothDamp(this.sun, this.isLightIntensityChangingMode);
+    }
+
+    /// <summary>
+    /// Выключение компонентов игрока.
+    /// </summary>
+    private void OnDisable()
+    {
+        this.inputActions.Player.Disable();
+    }
+    #endregion
+
+    #region Mechanics
+    /// <summary>
+    /// Прыжок.
+    /// </summary>
+    private void Jump()
+    {
+        this.playerRigidbody.AddForce(new Vector3(0, 5, 0), ForceMode.Impulse);
+    }
+    
+    /// <summary>
+    /// Плавное изменение интенсивности света - Directional Light через метод Math.SmoothDamp().
+    /// </summary>
+    private void ChangeDirectionalLightIntensity()
+    {
+        this.isLightIntensityChangingMode.Item1 = !this.isLightIntensityChangingMode.Item1;
+
+        if(this.isLightIntensityChangingMode.Item1)
+        {
+            this.isLightIntensityChangingMode.Item2 = !this.isLightIntensityChangingMode.Item2;
+        }
+    }
+    
+    /// <summary>
+    /// Плавное изменение цвета игрока
+    /// </summary>
+    private void ChangeColorLerp()
+    {
+        this.isNextColorByLerp = !this.isNextColorByLerp;
+
+        if(this.isNextColorByLerp)
+        {
+            IncreaseColorValue();
+        }
+    }
+    
+    /// <summary>
+    /// Изменение цвета игрока.
+    /// </summary>
+    private void ChangeColor()
+    {
+        IncreaseColorValue();
+        this.isNextColorByLerp = false;
+        this.playerRenderer.material.color = this.playerColors[colorChangeCount];
+    }
+    
+    /// <summary>
+    /// Изменение источника света.
+    /// </summary>
+    private void ChangeLightSource()
+    {
+        this.sun.enabled = !this.sun.enabled;
+        this.centralLamp.enabled = !this.centralLamp.enabled;
+    }
+    
+    /// <summary>
+    /// Обработчик команды удаления другого мяча через 3 секунды после ввода команды.
+    /// </summary>
+    private void DestroyOtherBall()
+    {
+        Destroy(otherBall, 3f);    
     }
     #endregion
 
@@ -158,7 +245,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void ComponentsInitialise()
     {
-        playerColors = new Color[]
+        this.playerColors = new Color[]
         {
             Color.black,
             Color.blue,
@@ -170,16 +257,16 @@ public class PlayerController : MonoBehaviour
             Color.white,
             Color.yellow,
         };
-        playerRigidbody = GetComponent<Rigidbody>();
-        playerRenderer = GetComponent<Renderer>();
-        count = 0;
+        this.playerRigidbody = GetComponent<Rigidbody>();
+        this.playerRenderer = GetComponent<Renderer>();
+        this.count = 0;
         
-        colorChangeCount = 0;
-        originPlayerColor = playerRenderer.material.color;
-        winTextObject.SetActive(false);
-        centralLamp.enabled = false;
-        isNextColorByLerp = false;
-        isLightIntensityChangingMode = (false, false);
+        this.colorChangeCount = 0;
+        this.originPlayerColor = this.playerRenderer.material.color;
+        this.winTextObject.SetActive(false);
+        this.centralLamp.enabled = false;
+        this.isNextColorByLerp = false;
+        this.isLightIntensityChangingMode = (false, false);
     }
 
     /// <summary>
@@ -187,10 +274,10 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void IncreaseColorValue()
     {
-        colorChangeCount++;
-        if(colorChangeCount >= playerColors.Length)
+        this.colorChangeCount++;
+        if(this.colorChangeCount >= this.playerColors.Length)
         {
-            colorChangeCount = 0;
+            this.colorChangeCount = 0;
         }
     }
 
@@ -203,8 +290,9 @@ public class PlayerController : MonoBehaviour
     {
         if(isLerpActivate)
         {
-            playerRenderer.material.color = Color.Lerp(playerRenderer.material.color,
-                                                       playerColors[colorChangeCount], 0.5f * Time.deltaTime);
+            this.playerRenderer.material.color = Color.Lerp(this.playerRenderer.material.color,
+                                                            this.playerColors[colorChangeCount], 
+                                                            0.5f * Time.deltaTime);
         }
     }
     
@@ -213,11 +301,10 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void SetCountText()
     {
-        countText.text = $"Count: {count}";
-
-        if(count >= 12)
+        this.countText.text = $"Count: {this.count}";
+        if(this.count >= 12)
         {
-            winTextObject.SetActive(true);
+            this.winTextObject.SetActive(true);
         }
     }
 
@@ -230,15 +317,15 @@ public class PlayerController : MonoBehaviour
     {
         if(isLightIntensityChange.Item1)
         {
-            float intensityVelocity = 0.0f;
+            var intensityVelocity = 0.0f;
             if(isLightIntensityChangingMode.Item2)
             {
-                currentLight.intensity = Mathf.SmoothDamp(currentLight.intensity, maxLightIntensity, 
+                currentLight.intensity = Mathf.SmoothDamp(currentLight.intensity, this.maxLightIntensity, 
                                                           ref intensityVelocity, 0.3f);
             }
             else
             {
-                currentLight.intensity = Mathf.SmoothDamp(currentLight.intensity, minLightIntensity, 
+                currentLight.intensity = Mathf.SmoothDamp(currentLight.intensity, this.minLightIntensity, 
                                                           ref intensityVelocity, 0.3f);
             }
         }
@@ -249,62 +336,12 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Движения игрока.
     /// </summary>
-    /// <param name="movementValue">Ввод пользователя. Клавиши 'WSDA'.</param>
-    private void OnMove(InputValue movementValue)
+    private void OnMove(InputAction.CallbackContext context)
     {
-        var movementVector = movementValue.Get<Vector2>();
+        var movementVector = context.ReadValue<Vector2>();
 
-        movementX = movementVector.x;
-        movementY = movementVector.y;
-    }
-
-    /// <summary>
-    /// Плавное изменение интенсивности света - Directional Light через метод Math.SmoothDamp().
-    /// </summary>
-    /// <param name="inputValue">Ввод пользователя. Клавиша 'I'.</param>
-    private void OnChangeDirectionalLightIntensity(InputValue inputValue)
-    {
-        isLightIntensityChangingMode.Item1 = !isLightIntensityChangingMode.Item1;
-
-        if(isLightIntensityChangingMode.Item1)
-        {
-            isLightIntensityChangingMode.Item2 = !isLightIntensityChangingMode.Item2;
-        }
-    }
-
-    /// <summary>
-    /// Плавное изменение цвета игрока
-    /// </summary>
-    /// <param name="colorValue">Ввод пользователя. Клавиша 'J'.</param>
-    private void OnChangeColorLerp(InputValue colorValue)
-    {
-        isNextColorByLerp = !isNextColorByLerp;
-
-        if(isNextColorByLerp)
-        {
-            IncreaseColorValue();
-        }
-    }
-
-    /// <summary>
-    /// Изменение цвета игрока.
-    /// </summary>
-    /// <param name="colorValue">Ввод пользователя. Клавиша 'R'.</param>
-    private void OnChangeColor(InputValue colorValue)
-    {
-        IncreaseColorValue();
-        isNextColorByLerp = false;
-        playerRenderer.material.color = playerColors[colorChangeCount];
-    }
-
-    /// <summary>
-    /// Изменение источника света.
-    /// </summary>
-    /// <param name="lightSourceValue">Ввод пользователя. Клавиша 'N'.</param>
-    private void OnChangeLightSource(InputValue lightSourceValue)
-    {
-        sun.enabled = !sun.enabled;
-        centralLamp.enabled = !centralLamp.enabled;
+        this.movementX = movementVector.x;
+        this.movementY = movementVector.y;
     }
 
     /// <summary>
@@ -318,18 +355,9 @@ public class PlayerController : MonoBehaviour
         {
             // Отключение других игровых объектов c нужным тегом.
             other.gameObject.SetActive(false);
-            count++;
+            this.count++;
             SetCountText();
         }
-    }
-
-    /// <summary>
-    /// Обработчик команды удаления другого мяча через 3 секунды после ввода команды.
-    /// </summary>
-    /// <param name="inputValue">Ввод пользователя. Клавиша 'Backspace'.</param>
-    private void OnDestroyOtherBall(InputValue inputValue)
-    {
-        Destroy(otherBall, 3f);    
     }
     #endregion
 }

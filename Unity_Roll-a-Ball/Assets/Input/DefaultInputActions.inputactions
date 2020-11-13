@@ -1,5 +1,5 @@
 {
-    "name": "InputActions",
+    "name": "DefaultInputActions",
     "maps": [
         {
             "name": "Player",
@@ -65,6 +65,14 @@
                     "name": "DestroyOtherBall",
                     "type": "Button",
                     "id": "7114b67b-67e7-43c0-abeb-8466a55c85c8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Jump",
+                    "type": "Button",
+                    "id": "ebf81813-dc49-4487-87f4-d844ffabaa21",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -343,6 +351,17 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "DestroyOtherBall",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fe5ddb64-3564-4026-9da9-fa2aaffbf790",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Jump",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
