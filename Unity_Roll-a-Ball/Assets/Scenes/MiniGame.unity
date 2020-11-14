@@ -2459,6 +2459,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 193cc8b31d009d74dba58df1c5226bac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rocketPrefab: {fileID: 1173238944491971778, guid: 309f10fa34bac854e8803e32ea62f963,
+    type: 3}
   otherBall: {fileID: 860567124}
   sun: {fileID: 2100954116}
   centralLamp: {fileID: 1613160588}

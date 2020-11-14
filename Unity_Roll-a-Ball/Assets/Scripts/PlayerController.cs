@@ -9,6 +9,12 @@ public class PlayerController : MonoBehaviour
 {
     #region Private Serialize Fields
     /// <summary>
+    /// Физическая обёртка снаряда.
+    /// </summary>
+    [SerializeField]
+    private GameObject rocketPrefab;
+    
+    /// <summary>
     /// Игровой объект - другой мяч.
     /// </summary>
     [SerializeField] 
@@ -47,12 +53,14 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Минимальная интенсивность света.
     /// </summary>
-    [SerializeField] private float minLightIntensity;
+    [SerializeField] 
+    private float minLightIntensity;
     
     /// <summary>
     /// Максимальная интенсивность света.
     /// </summary>
-    [SerializeField] private float maxLightIntensity;
+    [SerializeField] 
+    private float maxLightIntensity;
     #endregion
 
     #region Private Fields
@@ -67,14 +75,9 @@ public class PlayerController : MonoBehaviour
     private int count;
 
     /// <summary>
-    /// Движение игрока по X.
+    /// Направление передвижения игрока.
     /// </summary>
-    private float movementX;
-    
-    /// <summary>
-    /// Движение игрока по Y.
-    /// </summary>
-    private float movementY;
+    private Vector2 moveDirection;
 
     /// <summary>
     /// Компонент отрисовки игрока.
@@ -126,6 +129,7 @@ public class PlayerController : MonoBehaviour
         this.inputActions.Player.ChangeColor.performed += context => ChangeColor();
         this.inputActions.Player.ChangeLightSource.performed += context => ChangeLightSource();
         this.inputActions.Player.DestroyOtherBall.performed += context => DestroyOtherBall();
+        this.inputActions.Player.Fire.performed += context => Fire();
     }
 
     /// <summary>
@@ -150,8 +154,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void FixedUpdate()
     {
-        var movement = new Vector3(this.movementX,0.0f,this.movementY);
-        this.playerRigidbody.AddForce(movement * this.speed);
+        Move(this.moveDirection);
     }
     
     /// <summary>
@@ -177,6 +180,27 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region Mechanics
+    /// <summary>
+    /// Передвижение игрока.
+    /// </summary>
+    /// <param name="direction">Направление движения.</param>
+    private void Move(Vector2 direction)
+    {
+        var currentMoveDirection = new Vector3(direction.x, 0, direction.y);
+        this.playerRigidbody.AddForce(currentMoveDirection * (this.speed));
+    }
+    
+    /// <summary>
+    /// Огонь шариками.
+    /// </summary>
+    private void Fire()
+    {
+
+        var rocketInstance = Instantiate(rocketPrefab, playerRenderer.transform.position, 
+                                         Quaternion.Euler(new Vector3(0, 0, 0)));
+        rocketInstance.GetComponentInChildren<Rigidbody>().AddForce(new Vector3(0, 10, 0), ForceMode.Impulse);
+    }
+    
     /// <summary>
     /// Прыжок.
     /// </summary>
@@ -338,10 +362,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void OnMove(InputAction.CallbackContext context)
     {
-        var movementVector = context.ReadValue<Vector2>();
-
-        this.movementX = movementVector.x;
-        this.movementY = movementVector.y;
+        this.moveDirection = context.ReadValue<Vector2>();
     }
 
     /// <summary>
