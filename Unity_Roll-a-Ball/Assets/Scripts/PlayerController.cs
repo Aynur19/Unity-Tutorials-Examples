@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
+using UnityEngine.InputSystem.Controls;
 
 /// <summary>
 /// Контроллер игрока.
@@ -362,7 +363,19 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void OnMove(InputAction.CallbackContext context)
     {
-        this.moveDirection = context.ReadValue<Vector2>();
+        var control = context.control;
+        var button = control as ButtonControl;
+        
+        if(button != null && button.isPressed)
+        {
+            this.moveDirection = context.ReadValue<Vector2>();
+        }
+        else
+        {
+            this.moveDirection.x = 0;
+            this.moveDirection.y = 0;
+        }
+        //this.moveDirection = context.ReadValue<Vector2>();
     }
 
     /// <summary>
